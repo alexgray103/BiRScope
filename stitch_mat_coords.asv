@@ -1,4 +1,4 @@
-function  fused_array = stitch_mat_coords(filepath, filename, val, image_names)
+function  Fused_array = stitch_mat_coords(filepath, filename, val, image_names)
     
     Xsize = 2960;
     Ysize = 2960;
@@ -34,26 +34,26 @@ function  fused_array = stitch_mat_coords(filepath, filename, val, image_names)
 
     [rampy,rampx]=meshgrid(y, x);
  
-    ramp=gpuArray(rampy.*rampx);
-    ramp = single(ramp); % blending mask
+    ramp=rampy.*rampx;      % blending mask
+    ramp = single(ramp);
     cd(filepath);
     
-    %read in first image to set size of gpuArray (set second dimension as 2
-    %to make it easier to store GPUarray
+    %read in first image to set size of gpuA
     img = imread(sprintf('RGB_norm_%03d.tif', 1),1);
-    img = zeros([size(img,1),size(img,2),1], 'single');
-    Mosaic = zeros(max(Xcen)+Xsize ,max(Ycen)+Ysize, 'single');
-    Masque = zeros(size(Mosaic), 'single');
-    fused_array = zeros([size(Mosaic,1), size(Mosaic,2),3], 'uint8');
+    img = gpuArray(zeros([size(img,1),size(img,2),1], 'single'));
 
     fprintf(1,'Computation Progress: %3d%%\n',0);
-    for ii = 1:val
+    for ii = val
+        Mosaic = gpuArray(zeros(max(Xcen)+Xsize ,max(Ycen)+Ysize, 'single'));
+        Masque = gpuArray(zeros(size(Mosaic), 'single'));
+        fused_array = zeros([size(Mosaic,1), size(Mosaic,2),3], 'uint8');
+        
         for i=1:length(index)
             in = index(i);
             % load file and linear blend
-            imgtmp = imread(sprintf(filename, i));
+            img = imread(sprintf(filename, i));
             %img = squeeze(img(:,:,ii));
-            img(:,:,1) = imgtmp(:,:,ii);
+            img = gpuArray(img(:,:,ii));
             img = im2single(img);
             row = round(Xcen(in)-Xsize/2+1:Xcen(in)+Xsize/2);                                                 %changed by stephan
             column = round(Ycen(in)-Ysize/2+1:Ycen(in)+Ysize/2);
@@ -72,7 +72,7 @@ function  fused_array = stitch_mat_coords(filepath, filename, val, image_names)
         fprintf('Working on saving it')
         % resize image to 10 000 px size
         fprintf('saved it')
-        fused_array(:,:,ii) = MosaicFinal;
     end
+    Fused_array(:,:,ii) = MosaicFinal;
 end
 
