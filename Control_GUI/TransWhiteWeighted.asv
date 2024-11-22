@@ -1,0 +1,11 @@
+function [transweighted,transw]=TransWhiteWeighted(trans_corr,RGB_norm,thresh)
+
+    transw=trans_corr;
+    transw(trans_corr<thresh)=255;
+    transw(trans_corr>thresh)=1;
+    %figure(),imshow(transw)
+
+    transweighted=transw.*(RGB_norm+1);
+
+    figure
+end

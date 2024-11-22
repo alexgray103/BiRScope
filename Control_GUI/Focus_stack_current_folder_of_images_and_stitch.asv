@@ -1,0 +1,43 @@
+function Focus_stack_current_folder_of_images_and_stitch(directory,gridx,gridy, overlap)
+    addpath('C:\Users\BMOadmin2\Documents\Control_GUI\BRMscope\Functions')
+    addpath 'C:\Users\BMOadmin2\Documents\Control_GUI\BRMscope\Functions\qBRM'
+    solver = load('Symbolic_solution_0_60_120.mat').solve_qBRM_symbolic;
+
+   % load cmap for RGB image creation
+    cmap = load('C:\Users\BMOadmin2\Documents\Control_GUI\BRMscope\Functions\qBRM\cmap_v3.mat').cmap;    
+
+    cd(directory)
+    files = dir('*.tif');
+    for i = 1:length(files)
+        cd(files(i).folder)
+        
+        info = imfinfo([files(i).folder,'\',files(i).name]);
+        if strcmp(info(1).ColorType,'truecolor')
+            if ~exist('qBRM','dir')
+                mkdir('qBRM')
+            end
+            cd('qBRM')
+            stack = load_RGB_zstack([files(i).folder,'\',files(i).name]);
+            [A, RGB_norm, ~] = analyze_qBRM_zstack(stack);
+            write_zstack(A,'ret');
+            write_zstack(RGB_norm,'RGB_norm');
+            stack = A;
+            
+        else
+            if ~exist('Focus_Stack','dir')
+                mkdir('Focus_Stack')
+            end
+            cd('Focus_Stack')
+            stack = load_zstack([files(i).folder,'\',files(i).name]);
+        end
+        cd(files(i).folder)
+        [edofimg] = fstack(stack);
+        strcmp(info(1).ColorType,'truecolor')
+        imwrite(edofimg,sprintf('Focus_Stack_%03d.tif',i))
+        fprintf(' %%%%%%%%%%%% Focus Stacked Image %d %%%%%%%%%%%%%%\n',i)
+    end
+    
+    fiji_stitching(gridx, gridy, overlap, directory, 'Focus_Stack_{iii}.tif', 'Focus_stack_fused');
+    movefile('img_t1_z1_c1', 'Focus_stack_Fused.tif'); % change the filename into a tif format
+
+end
