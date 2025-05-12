@@ -67,7 +67,7 @@ Developed by **Alexander Gray** in the **Biomedical Optics Lab**, this tool is p
 
 If you use this software in your research, please cite:
 
-> Gray, A., et al. (Year). High-throughput label-free analysis of myelin pathology using birefringence microscopy and deep learning. [Journal Name], [Volume(Issue)], pages.
+> Birefringence microscopy enables rapid, label-free quantification of myelin debris following induced cortical injury _Neurophotonics_ **[Under review]**
 
 ## License
 
